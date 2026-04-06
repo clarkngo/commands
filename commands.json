@@ -1,0 +1,24 @@
+{
+  "commands": [
+    {
+      "title": "Install Homebrew",
+      "command": "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"",
+      "tags": ["homebrew", "macos", "install"]
+    },
+    {
+      "title": "Install MySQL (Homebrew)",
+      "command": "brew install mysql",
+      "tags": ["homebrew", "mysql", "install"]
+    },
+    {
+      "title": "Start MySQL service",
+      "command": "brew services start mysql",
+      "tags": ["homebrew", "mysql", "services"]
+    },
+    {
+      "title": "Stop MySQL service",
+      "command": "brew services stop mysql",
+      "tags": ["homebrew", "mysql", "services"]
+    }
+  ]
+}
