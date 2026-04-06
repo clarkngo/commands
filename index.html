@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Command lookup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0f1419;
+        --surface: #1a2332;
+        --border: #2d3a4d;
+        --text: #e6edf3;
+        --muted: #8b9cb3;
+        --accent: #58a6ff;
+        --accent-dim: #388bfd66;
+        --tag-bg: #212c3d;
+        --success: #3fb950;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      .wrap {
+        max-width: 52rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+      }
+
+      header {
+        margin-bottom: 1.75rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0 0 0.35rem;
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0;
+      }
+
+      .search-row {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1.25rem;
+      }
+
+      label[for="q"] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
+      #q {
+        flex: 1;
+        padding: 0.65rem 0.9rem;
+        font-size: 1rem;
+        font-family: inherit;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+
+      #q::placeholder {
+        color: var(--muted);
+      }
+
+      #q:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+      }
+
+      .kbd-hint {
+        display: none;
+        font-size: 0.8rem;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      @media (min-width: 520px) {
+        .kbd-hint {
+          display: block;
+        }
+      }
+
+      kbd {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.75rem;
+        padding: 0.15rem 0.4rem;
+        background: var(--tag-bg);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+      }
+
+      .meta {
+        font-size: 0.875rem;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+
+      .empty {
+        color: var(--muted);
+        padding: 2rem 0;
+        text-align: center;
+      }
+
+      ul.commands {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem 1.1rem;
+      }
+
+      .card h2 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0 0 0.65rem;
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .tag {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        background: var(--tag-bg);
+        color: var(--muted);
+        border-radius: 999px;
+      }
+
+      .cmd-block {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+
+      pre.cmd {
+        flex: 1;
+        margin: 0;
+        padding: 0.65rem 0.75rem;
+        background: #0d1117;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        line-height: 1.45;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .copy {
+        flex-shrink: 0;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-family: inherit;
+        font-weight: 600;
+        color: var(--accent);
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+      }
+
+      .copy:hover {
+        background: var(--tag-bg);
+        border-color: var(--accent);
+      }
+
+      .copy.copied {
+        color: var(--success);
+        border-color: var(--success);
+      }
+
+      .err {
+        background: #3d1f1f;
+        border: 1px solid #f85149;
+        color: #ffb1ac;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Command lookup</h1>
+        <p class="subtitle">Search snippets you use often. Edit <code>commands.json</code> to add more.</p>
+      </header>
+
+      <div id="load-error" class="err" hidden></div>
+
+      <div class="search-row">
+        <label for="q">Search commands</label>
+        <input
+          type="search"
+          id="q"
+          placeholder="Search title, command, or tag…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="kbd-hint"><kbd>/</kbd> to focus</span>
+      </div>
+
+      <p class="meta" id="count"></p>
+
+      <ul class="commands" id="list"></ul>
+      <p class="empty" id="empty" hidden>No matches.</p>
+    </div>
+
+    <script>
+      (function () {
+        const listEl = document.getElementById("list");
+        const qEl = document.getElementById("q");
+        const countEl = document.getElementById("count");
+        const emptyEl = document.getElementById("empty");
+        const errEl = document.getElementById("load-error");
+
+        /** @type {{ title: string, command: string, tags?: string[] }[]} */
+        let commands = [];
+
+        function norm(s) {
+          return (s || "").toLowerCase();
+        }
+
+        function matches(item, query) {
+          if (!query) return true;
+          const q = norm(query);
+          if (norm(item.title).includes(q)) return true;
+          if (norm(item.command).includes(q)) return true;
+          const tags = item.tags || [];
+          return tags.some((t) => norm(t).includes(q));
+        }
+
+        function render(filtered) {
+          listEl.innerHTML = "";
+          emptyEl.hidden = filtered.length > 0;
+          countEl.textContent =
+            filtered.length === commands.length
+              ? commands.length + " command" + (commands.length === 1 ? "" : "s")
+              : filtered.length + " of " + commands.length + " shown";
+
+          filtered.forEach((item, i) => {
+            const li = document.createElement("li");
+            li.className = "card";
+
+            const h2 = document.createElement("h2");
+            h2.textContent = item.title;
+            li.appendChild(h2);
+
+            const tags = item.tags || [];
+            if (tags.length) {
+              const div = document.createElement("div");
+              div.className = "tags";
+              tags.forEach((t) => {
+                const span = document.createElement("span");
+                span.className = "tag";
+                span.textContent = t;
+                div.appendChild(span);
+              });
+              li.appendChild(div);
+            }
+
+            const row = document.createElement("div");
+            row.className = "cmd-block";
+
+            const pre = document.createElement("pre");
+            pre.className = "cmd";
+            pre.textContent = item.command;
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "copy";
+            btn.textContent = "Copy";
+            btn.setAttribute("aria-label", "Copy command to clipboard");
+            btn.addEventListener("click", async () => {
+              try {
+                await navigator.clipboard.writeText(item.command);
+                btn.textContent = "Copied";
+                btn.classList.add("copied");
+                setTimeout(() => {
+                  btn.textContent = "Copy";
+                  btn.classList.remove("copied");
+                }, 2000);
+              } catch (_) {
+                btn.textContent = "Failed";
+                setTimeout(() => {
+                  btn.textContent = "Copy";
+                }, 2000);
+              }
+            });
+
+            row.appendChild(pre);
+            row.appendChild(btn);
+            li.appendChild(row);
+            listEl.appendChild(li);
+          });
+        }
+
+        function applyFilter() {
+          const q = qEl.value.trim();
+          render(commands.filter((c) => matches(c, q)));
+        }
+
+        qEl.addEventListener("input", applyFilter);
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "/" && document.activeElement !== qEl) {
+            const t = e.target;
+            if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+            e.preventDefault();
+            qEl.focus();
+          }
+        });
+
+        fetch("commands.json")
+          .then((r) => {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          })
+          .then((data) => {
+            commands = data.commands || [];
+            applyFilter();
+          })
+          .catch(() => {
+            errEl.hidden = false;
+            errEl.textContent =
+              "Could not load commands.json. Open this site over HTTP (e.g. GitHub Pages) or run a local server: python3 -m http.server";
+            countEl.textContent = "";
+          });
+      })();
+    </script>
+  </body>
+</html>
