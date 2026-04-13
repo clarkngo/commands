@@ -19,6 +19,31 @@
       "title": "Stop MySQL service",
       "command": "brew services stop mysql",
       "tags": ["homebrew", "mysql", "services"]
+    },
+    {
+      "title": "OpenMetadata MySQL: grant all to openmetadata_user",
+      "command": "docker exec -it openmetadata_mysql mysql -u root -ppassword -e \"GRANT ALL PRIVILEGES ON *.* TO 'openmetadata_user'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;\"",
+      "tags": ["docker", "openmetadata", "mysql", "grant"]
+    },
+    {
+      "title": "List running Docker containers",
+      "command": "docker ps",
+      "tags": ["docker", "containers"]
+    },
+    {
+      "title": "Docker Compose: down",
+      "command": "docker-compose down",
+      "tags": ["docker", "docker-compose", "compose"]
+    },
+    {
+      "title": "Docker Compose: up detached",
+      "command": "docker-compose up -d",
+      "tags": ["docker", "docker-compose", "compose"]
+    },
+    {
+      "title": "List processes using port 3306",
+      "command": "sudo lsof -i :3306",
+      "tags": ["lsof", "mysql", "port", "network", "sudo"]
     }
   ]
 }
