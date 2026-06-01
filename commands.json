@@ -44,6 +44,11 @@
       "title": "List processes using port 3306",
       "command": "sudo lsof -i :3306",
       "tags": ["lsof", "mysql", "port", "network", "sudo"]
+    },
+    {
+      "title": "Expo start tunnel clear",
+      "command": "CI=1 npx expo start --tunnel --clear",
+      "tags": ["expo", "react-native", "start", "tunnel"]
     }
   ]
 }
